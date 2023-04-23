@@ -1,9 +1,9 @@
 {
   "license": "ISC",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "name": "@arcaelas/create-module",
   "bin": {
-    "create":"lib/index.js"
+    "create": "lib/index.js"
   },
   "main": "lib/index.js",
   "description": "This library is used to create modules from scratch with linter and configs files for default.\n It provides a starting point for developers who want to create their own modules, and it includes a set of tools and libraries that are commonly used in software development.\n The library is easy to use, and it can help developers to save time and effort when creating new modules.",
