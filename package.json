@@ -1,6 +1,6 @@
 {
   "license": "ISC",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "main": "lib/index.js",
   "name": "arcaelas",
   "description": "This library is used to create modules from scratch with linter and configs files for default.\n It provides a starting point for developers who want to create their own modules, and it includes a set of tools and libraries that are commonly used in software development.\n The library is easy to use, and it can help developers to save time and effort when creating new modules.",
