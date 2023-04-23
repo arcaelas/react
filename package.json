@@ -1,6 +1,6 @@
 {
   "license": "ISC",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "name": "@arcaelas/create-module",
   "bin": "lib/index.js",
   "main": "lib/index.js",
