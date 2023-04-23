@@ -9,7 +9,5 @@ const __dirname = path.dirname( __filename )
 
 
 for(const filename of fs.readdirSync( __dirname )){
-    
     console.log( filename )
-
 }
