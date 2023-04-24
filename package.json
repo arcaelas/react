@@ -1,9 +1,9 @@
 {
   "license": "ISC",
   "version": "2.9.0",
-  "name": "@arcaelas/create",
+  "name": "@arcaelas/react",
   "main": "lib/index.js",
-  "description": "This library is used to create modules from scratch with linter and configs files for default.\n It provides a starting point for developers who want to create their own modules, and it includes a set of tools and libraries that are commonly used in software development.\n The library is easy to use, and it can help developers to save time and effort when creating new modules.",
+  "description": "Is a JavaScript library that provides a collection of tools and utilities for building React JS applications. It includes features such as:",
   "scripts": {
     "test": "jest",
     "start": "tsc --watch",
@@ -36,5 +36,11 @@
     "jest": "^29.5.0",
     "ts-jest": "^29.1.0",
     "typescript": "^5.0.4"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0"
+  },
+  "dependencies": {
+    "@arcaelas/utils": "^1.26.0"
   }
 }
