@@ -3,7 +3,7 @@
   "version": "2.10.0",
   "name": "@arcaelas/react",
   "main": "lib/index.js",
-  "description": "Is a JavaScript library that provides a collection of tools and utilities for building React JS applications. It includes features such as:",
+  "description": "Is a JavaScript library that provides a collection of tools and utilities for building React JS applications.",
   "scripts": {
     "test": "jest",
     "start": "tsc --watch",
