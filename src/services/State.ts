@@ -131,7 +131,6 @@ export default class State<S = any> extends Function {
 		this.emit('update', state)
 	}
 
-
 	private __call() {
 		const [state, setState] = React.useState(this.state)
 		React.useEffect(() =>
