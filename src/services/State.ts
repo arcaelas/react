@@ -118,7 +118,7 @@ export default class State<S = any> extends Function {
 	 * }
 	 */
 	set(state: DispatchParam<S>): Promise<void>
-	async set(state: any) {
+	set(state: any) {
 		console.log('set():', { this: this, state })
 		// 	await state
 		// 	if (this.state === state) return
