@@ -117,7 +117,7 @@ export default class State<S = any> extends Function {
 	 * 	useStore.set({ ready: true })
 	 * }
 	 */
-	set(state: DispatchParam<S>): Promise<void>
+	set(state: DispatchParam<S>): void
 	set(state: any) {
 		console.log('set():', { this: this, state })
 		// 	await state
