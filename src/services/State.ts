@@ -136,7 +136,9 @@ export default class State<S = any> extends Function {
 		React.useEffect(() =>
 			this.listen('updated', (o: any) => setState(copy(o))),
 			[state, setState])
-		return [state, this.set]
+		return [state, function (value) {
+			console.log('Setting:', value)
+		}]
 	}
 
 }
