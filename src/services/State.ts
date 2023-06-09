@@ -56,17 +56,17 @@ export default class State<S = any> extends Function {
 		return this.bind(this)
 	}
 
-	// private readonly events = new EventTarget()
-	// private listen(evt: string, handler: Noop) {
-	// 	const bind = ({ detail }: CustomEvent) => handler(...detail)
-	// 	this.events.addEventListener(evt, bind)
-	// 	return () => this.events.removeEventListener(evt, bind)
-	// }
-	// private emit(evt: string, ...args: any[]) {
-	// 	this.events.dispatchEvent(new CustomEvent(evt, {
-	// 		detail: args
-	// 	}))
-	// }
+	private readonly events = new EventTarget()
+	private listen(evt: string, handler: Noop) {
+		const bind = ({ detail }: CustomEvent) => handler(...detail)
+		this.events.addEventListener(evt, bind)
+		return () => this.events.removeEventListener(evt, bind)
+	}
+	private emit(evt: string, ...args: any[]) {
+		this.events.dispatchEvent(new CustomEvent(evt, {
+			detail: args
+		}))
+	}
 
 	/**
 	 * @description
@@ -117,8 +117,8 @@ export default class State<S = any> extends Function {
 	 * 	useStore.set({ ready: true })
 	 * }
 	 */
-	set(state: DispatchParam<S>): void
-	set(state: any) {
+	set(state: DispatchParam<S>): Promise<void>
+	async set(state: any) {
 		console.log('set():', { this: this, state })
 		// 	await state
 		// 	if (this.state === state) return
@@ -133,17 +133,11 @@ export default class State<S = any> extends Function {
 	}
 
 	private __call() {
-
-		return [this.state, () => {
-			console.log('hook():', { this: this })
-		}]
-		// const [state, setState] = React.useState(this.state)
-		// React.useEffect(() =>
-		// 	this.listen('updated', (o: any) => setState(copy(o))),
-		// 	[state, setState])
-		// return [state, function (value) {
-		// 	console.log('Setting:', value)
-		// }]
+		const [state, setState] = React.useState(this.state)
+		React.useEffect(() =>
+			this.listen('update', (o: any) => setState(o))
+		)
+		return [state, this.set]
 	}
 
 }
