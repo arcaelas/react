@@ -1,10 +1,8 @@
 import React from 'react'
-import { copy, merge, type Noop, type IObject } from '@arcaelas/utils'
+import { copy, merge, type Noop, } from '@arcaelas/utils'
 
-export type Listener<S> = Noop<[IState<S>, IState<S>]>
 export type DispatchState<S> = (state: DispatchParam<S>) => void
 export type DispatchParam<S> = IState<S> | ((current: IState<S>) => IState<S>)
-
 export type IState<S> = S extends never | null | undefined ? NonNullable<S> : (
 	S extends Array<never | null | undefined> ? any[] : (
 		S extends Array<any> ? S : (
@@ -13,92 +11,91 @@ export type IState<S> = S extends never | null | undefined ? NonNullable<S> : (
 	)
 )
 
-export default interface State<S = any> {
+export default interface Store<S = any> {
+	/**
+	 * @description Use this function to create a data store that can be called from any component,
+	 * this store can be updated even from outside a React component.
+	 * @example
+	 * const useStore = new State({
+	 * 	name:'anonymous',
+	 * 	followers: 100
+	 * })
+	 * 
+	 * function ProfileComponent(){
+	 * 	const [ state, setState ] = useStore()
+	 * 	return <div>
+	 * 		Hi {state.name},
+	 * 		<span children='click' onClick={()=> setState({ folowers: state.folowers + 1 })} /> here for increment your followers!
+	 * 	</div>
+	 * }
+	 * @description
+	 * If the initial value of a store is an array,
+	 * it will always be treated as an array,
+	 * it is important to know that arrays are mutable and trigger an event when modified.
+	 * @example
+	 * const useStore = new State([])
+	 * function MyShops(){
+	 * 	const [ shops, setShops ] = useStore()
+	 * 	return <>
+	 * 		<button onClick={()=> setShops(shops.slice(1))}> Remove first shop </button>
+	 * 		<ul>
+	 * 			{shops.map(shop=> <li> { shop.name } </li>)}
+	 * 		</ul>
+	 * 		<button onClick={()=> shops.pop()}> Remove last shop </button>
+	 * 	</>
+	 * }
+	 * 
+	*/
+	new(state: S): void
 	(): [IState<S>, DispatchState<S>]
-	new(state: S): this
-	onChange(handler: Listener<S>, validator?: Noop<[IState<S>, IState<S>], boolean>): () => void
-	set(state: DispatchParam<S>): void
 }
+export default class Store<S = any> extends Function {
 
-/**
- * @description Use this function to create a data store that can be called from any component,
- * this store can be updated even from outside a React component.
- * @example
- * const useStore = new State({
- * 	name:'anonymous',
- * 	followers: 100
- * })
- * 
- * function ProfileComponent(){
- * 	const [ state, setState ] = useStore()
- * 	return <div>
- * 		Hi {state.name},
- * 		<span children='click' onClick={()=> setState({ folowers: state.folowers + 1 })} /> here for increment your followers!
- * 	</div>
- * }
- * @description
- * If the initial value of a store is an array,
- * it will always be treated as an array,
- * it is important to know that arrays are mutable and trigger an event when modified.
- * @example
- * const useStore = new State([])
- * function MyShops(){
- * 	const [ shops, setShops ] = useStore()
- * 	return <>
- * 		<button onClick={()=> setShops(shops.slice(1))}> Remove first shop </button>
- * 		<ul>
- * 			{shops.map(shop=> <li> { shop.name } </li>)}
- * 		</ul>
- * 		<button onClick={()=> shops.pop()}> Remove last shop </button>
- * 	</>
- * }
- * 
-*/
-export default class State<S = any> extends Function {
-	constructor(public state: S) {
-		super("...args", "return this.useHook(...args)")
+	constructor(private state = null) {
+		super('...args', 'return this.__call(...args)')
+		this.listen('update', async state => {
+			if (this.state === state) return
+			const prev = copy(this.state)
+			state = typeof state === 'function' ? await state(prev) : await state
+			this.state = state instanceof Array ? [].concat(state) : (
+				typeof (state ?? 0) === 'object' ? merge({}, this.state, state) : state
+			)
+			for (const cb of this.queue as any)
+				await cb(this.state, prev)
+			this.emit('updated', this.state)
+		})
 		return this.bind(this)
 	}
 
-	private events = new EventTarget()
-	private listen(handler: any) {
-		const subscriptor = ({ detail }: any) => handler(...detail)
-		this.events.addEventListener('state', subscriptor)
-		return () => this.events.removeEventListener('state', subscriptor)
+	private readonly events = new EventTarget()
+	private listen(evt: string, handler: Noop) {
+		const bind = ({ detail }: CustomEvent) => handler(...detail)
+		this.events.addEventListener(evt, bind)
+		return () => this.events.removeEventListener(evt, bind)
 	}
-	private emit(...detail: any) {
-		return this.events.dispatchEvent(new CustomEvent('state', { detail }))
+	private emit(evt: string, ...args: any[]) {
+		this.events.dispatchEvent(new CustomEvent(evt, {
+			detail: args
+		}))
 	}
 
-	private queue = new Set()
+	queue = new Set<Noop>()
 	/**
 	 * @description
-	 * Stores also accept listeners to subscribe to changes anywhere in the DOM,
-	 * inside and outside of components.
-	 * @example
-	 * useProfileStore.onChange((state, prevState)=>{
-	 *   console.log('Your profile was changed!')
-	 * })
-	 * @description
-	 * The listener can be intercepted by a validator to determine if a change needs to be monitored.
-	 * @example
-	 * useProfileStore.onChange(profile=>{
-	 * 	console.log('Your name was chaned!')
-	 * 	axios.post(`/${ profile.id }/update`, {
-	 *      data: profile
-	 *  })
-	 * }, (state, prev)=> state.name !== prev.name) // Only when name is changed.
-	 * @description
-	 * You can also use string name of property.
-	 * @example
-	 * useProfileStore.onChange(profile=>{
-	 * 	console.log('Your name was chaned!')
-	 * 	axios.post(`/${ profile.id }/update`, {
-	 *      data: profile
-	 *  })
-	 * }, [ 'name' ]) // Only when name is changed.
+	 * Fire trigger when state is changed but before change components
 	 */
-	onChange(handler: any, validator: any) {
+	onChange(handler: Noop<[next: S, prev: S], S>): Noop
+	/**
+	 * @description
+	 * Fire only if some those keys was changed
+	 */
+	onChange(handler: Noop<[next: S, prev: S], S>, shouldHandler: string[]): Noop
+	/**
+	 * @description
+	 * Fire only if validator function be true.
+	 */
+	onChange(handler: Noop<[next: S, prev: S], S>, shouldHandler: Noop<[next: S, prev: S], boolean>): Noop
+	onChange(handler: any, validator?: any): any {
 		validator = validator ? (
 			validator instanceof Array ? (a: any, b: any) => (validator as any).some((k: string) => a?.[k] !== b?.[k]) : validator
 		) : Boolean.bind(null, 1)
@@ -115,28 +112,15 @@ export default class State<S = any> extends Function {
 	 * 	useStore.set({ ready: true })
 	 * }
 	 */
-	set(state: any) {
-		if (this.state === state) return
-		const current = copy(this.state)
-		state = typeof state === 'function' ? state(current) : state
-		this.state = this.state as any instanceof Array ? [].concat(state) : (
-			typeof (this.state ?? false) === "object" ? merge({}, current, state) : state
-		)
-		for (const cb of this.queue as any)
-			cb(this.state, current)
-		this.emit(this.state)
-		return
-	}
+	set(state: S): void
+	set(state: any) { this.emit('update', state) }
 
-	/**
-	 * @description
-	 * Use this method to call ReactJS useState.
-	 */
-	protected useHook() {
+	private __call() {
 		const [state, setState] = React.useState(this.state)
 		React.useEffect(() =>
-			this.listen((o: any) => setState(o)),
+			this.listen('updated', (o: any) => setState(o)),
 			[state, setState])
 		return [state, this.set]
 	}
+
 }
