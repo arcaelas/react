@@ -54,15 +54,16 @@ export default class State<S = any> extends Function {
 	constructor(private state = null) {
 		super('...args', 'return this.__call(...args)')
 		this.listen('update', async state => {
+			await state
 			if (this.state === state) return
 			const prev = copy(this.state)
-			state = typeof state === 'function' ? await state(prev) : await state
-			this.state = state instanceof Array ? [].concat(state) : (
+			state = await (typeof state === 'function' ? state(prev) : state)
+			state = state instanceof Array ? [].concat(state) : (
 				typeof (state ?? 0) === 'object' ? merge({}, this.state, state) : state
 			)
 			for (const cb of this.queue as any)
-				await cb(this.state, prev)
-			this.emit('updated', this.state)
+				state = await cb(state, prev)
+			this.emit('updated', this.state = state)
 		})
 		return this.bind(this)
 	}
@@ -118,7 +119,7 @@ export default class State<S = any> extends Function {
 	private __call() {
 		const [state, setState] = React.useState(this.state)
 		React.useEffect(() =>
-			this.listen('updated', (o: any) => setState(o)),
+			this.listen('updated', (o: any) => setState(copy(o))),
 			[state, setState])
 		return [state, this.set]
 	}
