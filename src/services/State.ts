@@ -122,7 +122,7 @@ export default class State<S = any> extends Function {
 		state = state instanceof Array ? [].concat(state) : (
 			typeof (state ?? 0) === 'object' ? merge({}, this.state, state) : state
 		)
-		for (const cb of this.queue as any)
+		for (const cb of Array.from(this.queue))
 			state = await cb(state, prev)
 		this.emit('updated', this.state = state)
 	}
