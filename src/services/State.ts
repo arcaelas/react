@@ -11,7 +11,7 @@ export type IState<S> = S extends never | null | undefined ? NonNullable<S> : (
 	)
 )
 
-export default interface Store<S = any> {
+export default interface State<S = any> {
 	/**
 	 * @description Use this function to create a data store that can be called from any component,
 	 * this store can be updated even from outside a React component.
@@ -49,7 +49,7 @@ export default interface Store<S = any> {
 	new(state: S): void
 	(): [IState<S>, DispatchState<S>]
 }
-export default class Store<S = any> extends Function {
+export default class State<S = any> extends Function {
 
 	constructor(private state = null) {
 		super('...args', 'return this.__call(...args)')
@@ -112,7 +112,7 @@ export default class Store<S = any> extends Function {
 	 * 	useStore.set({ ready: true })
 	 * }
 	 */
-	set(state: S): void
+	set(state: DispatchParam<S>): void
 	set(state: any) { this.emit('update', state) }
 
 	private __call() {
