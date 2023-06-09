@@ -77,7 +77,7 @@ export default class State<S = any> extends Function {
 	}
 
 	set value(value: S) {
-		// this.set(value as any)
+		this.set(value as any)
 	}
 
 	// queue = []
@@ -109,28 +109,28 @@ export default class State<S = any> extends Function {
 	// 	}
 	// }
 
-	// /**
-	//  * @description
-	//  * You can also update the state of the store while outside of a component.
-	//  * @example
-	//  * window.onload = ()=>{
-	//  * 	useStore.set({ ready: true })
-	//  * }
-	//  */
-	// set(state: DispatchParam<S>): void
-	// async set(state: any) {
-	// 	console.log('set():', { this: this, state })
-	// 	await state
-	// 	if (this.state === state) return
-	// 	const prev = copy(this.state)
-	// 	state = await (typeof state === 'function' ? state(prev) : state)
-	// 	state = state instanceof Array ? [].concat(state) : (
-	// 		typeof (state ?? 0) === 'object' ? merge({}, this.state, state) : state
-	// 	)
-	// 	for (const cb of this.queue)
-	// 		state = await cb(state, prev)
-	// 	this.emit('updated', this.state = state)
-	// }
+	/**
+	 * @description
+	 * You can also update the state of the store while outside of a component.
+	 * @example
+	 * window.onload = ()=>{
+	 * 	useStore.set({ ready: true })
+	 * }
+	 */
+	set(state: DispatchParam<S>): void
+	async set(state: any) {
+		console.log('set():', { this: this, state })
+		// 	await state
+		// 	if (this.state === state) return
+		// 	const prev = copy(this.state)
+		// 	state = await (typeof state === 'function' ? state(prev) : state)
+		// 	state = state instanceof Array ? [].concat(state) : (
+		// 		typeof (state ?? 0) === 'object' ? merge({}, this.state, state) : state
+		// 	)
+		// 	for (const cb of this.queue)
+		// 		state = await cb(state, prev)
+		// 	this.emit('updated', this.state = state)
+	}
 
 	private __call() {
 
