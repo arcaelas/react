@@ -13,7 +13,7 @@ export type IState<S> = S extends never | null | undefined ? NonNullable<S> : (
 	)
 )
 
-export default interface State<S extends null | any[] | IObject = IObject> {
+export default interface State<S = any> {
 	(): [IState<S>, DispatchState<S>]
 	new(state: S): this
 	onChange(handler: Listener<S>, validator?: Noop<[IState<S>, IState<S>], boolean>): () => void
@@ -54,7 +54,7 @@ export default interface State<S extends null | any[] | IObject = IObject> {
  * }
  * 
 */
-export default class State<S extends null | any[] | IObject = IObject> extends Function {
+export default class State<S = any> extends Function {
 	constructor(public state: S) {
 		super("...args", "return this.useHook(...args)")
 		return this.bind(this)
