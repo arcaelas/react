@@ -126,7 +126,10 @@ export default class State<S = any> extends Function {
 	 * }
 	 */
 	set(state: DispatchParam<S>): void
-	set(state: any) { this.emit('update', state) }
+	set(state: any) {
+		console.log('This:', this)
+		this.emit('update', state)
+	}
 
 	private __call() {
 		const [state, setState] = React.useState(this.state)
