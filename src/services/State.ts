@@ -1,5 +1,5 @@
 import React from 'react'
-import { clone, merge, type Noop, type IObject } from '@arcaelas/utils'
+import { copy, merge, type Noop, type IObject } from '@arcaelas/utils'
 
 export type Listener<S> = Noop<[IState<S>, IState<S>]>
 export type DispatchState<S> = (state: DispatchParam<S>) => void
@@ -117,7 +117,7 @@ export default class State<S extends null | any[] | IObject = IObject> extends F
 	 */
 	set(state: any) {
 		if (this.state === state) return
-		const current = clone(this.state)
+		const current = copy(this.state)
 		state = typeof state === 'function' ? state(current) : state
 		this.state = this.state as any instanceof Array ? [].concat(state) : (
 			typeof (this.state ?? false) === "object" ? merge({}, current, state) : state
