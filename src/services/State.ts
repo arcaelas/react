@@ -137,7 +137,7 @@ export default class State<S = any> extends Function {
 		React.useEffect(() =>
 			this.listen('update', (o: any) => setState(o))
 		)
-		return [state, this.set]
+		return [state, this.set.bind(this)]
 	}
 
 }
