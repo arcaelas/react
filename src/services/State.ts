@@ -80,6 +80,18 @@ export default class State<S = any> extends Function {
 		}))
 	}
 
+	/**
+	 * @description
+	 * Get a copy of current state, without relationship.
+	 */
+	get value(): S {
+		return copy(this.state)
+	}
+
+	set value(value: S) {
+		this.emit('update', value)
+	}
+
 	queue = new Set<Noop>()
 	/**
 	 * @description
