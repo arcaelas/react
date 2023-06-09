@@ -118,7 +118,7 @@ export default class State<S = any> extends Function {
 	 * }
 	 */
 	set(state: DispatchParam<S>): void
-	async set(state: any) {
+	set(state: any) {
 		console.log('set():', { this: this, state })
 		// 	await state
 		// 	if (this.state === state) return
@@ -134,7 +134,7 @@ export default class State<S = any> extends Function {
 
 	private __call() {
 
-		return [this.state, function () {
+		return [this.state, () => {
 			console.log('hook():', { this: this })
 		}]
 		// const [state, setState] = React.useState(this.state)
