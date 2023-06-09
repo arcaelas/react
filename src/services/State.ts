@@ -53,18 +53,6 @@ export default class State<S = any> extends Function {
 
 	constructor(private state = null) {
 		super('...args', 'return this.__call(...args)')
-		this.listen('update', async state => {
-			await state
-			if (this.state === state) return
-			const prev = copy(this.state)
-			state = await (typeof state === 'function' ? state(prev) : state)
-			state = state instanceof Array ? [].concat(state) : (
-				typeof (state ?? 0) === 'object' ? merge({}, this.state, state) : state
-			)
-			for (const cb of this.queue as any)
-				state = await cb(state, prev)
-			this.emit('updated', this.state = state)
-		})
 		return this.bind(this)
 	}
 
@@ -89,7 +77,7 @@ export default class State<S = any> extends Function {
 	}
 
 	set value(value: S) {
-		this.emit('update', value)
+		this.set(value as any)
 	}
 
 	queue = new Set<Noop>()
@@ -126,9 +114,17 @@ export default class State<S = any> extends Function {
 	 * }
 	 */
 	set(state: DispatchParam<S>): void
-	set(state: any) {
-		console.log('This:', this)
-		this.emit('update', state)
+	async set(state: any) {
+		await state
+		if (this.state === state) return
+		const prev = copy(this.state)
+		state = await (typeof state === 'function' ? state(prev) : state)
+		state = state instanceof Array ? [].concat(state) : (
+			typeof (state ?? 0) === 'object' ? merge({}, this.state, state) : state
+		)
+		for (const cb of this.queue as any)
+			state = await cb(state, prev)
+		this.emit('updated', this.state = state)
 	}
 
 	private __call() {
