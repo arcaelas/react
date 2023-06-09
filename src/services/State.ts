@@ -56,17 +56,17 @@ export default class State<S = any> extends Function {
 		return this.bind(this)
 	}
 
-	private readonly events = new EventTarget()
-	private listen(evt: string, handler: Noop) {
-		const bind = ({ detail }: CustomEvent) => handler(...detail)
-		this.events.addEventListener(evt, bind)
-		return () => this.events.removeEventListener(evt, bind)
-	}
-	private emit(evt: string, ...args: any[]) {
-		this.events.dispatchEvent(new CustomEvent(evt, {
-			detail: args
-		}))
-	}
+	// private readonly events = new EventTarget()
+	// private listen(evt: string, handler: Noop) {
+	// 	const bind = ({ detail }: CustomEvent) => handler(...detail)
+	// 	this.events.addEventListener(evt, bind)
+	// 	return () => this.events.removeEventListener(evt, bind)
+	// }
+	// private emit(evt: string, ...args: any[]) {
+	// 	this.events.dispatchEvent(new CustomEvent(evt, {
+	// 		detail: args
+	// 	}))
+	// }
 
 	/**
 	 * @description
@@ -77,69 +77,73 @@ export default class State<S = any> extends Function {
 	}
 
 	set value(value: S) {
-		this.set(value as any)
+		// this.set(value as any)
 	}
 
-	queue = []
-	/**
-	 * @description
-	 * Fire trigger when state is changed but before change components
-	 */
-	onChange(handler: Noop<[next: S, prev: S], S>): Noop
-	/**
-	 * @description
-	 * Fire only if some those keys was changed
-	 */
-	onChange(handler: Noop<[next: S, prev: S], S>, shouldHandler: string[]): Noop
-	/**
-	 * @description
-	 * Fire only if validator function be true.
-	 */
-	onChange(handler: Noop<[next: S, prev: S], S>, shouldHandler: Noop<[next: S, prev: S], boolean>): Noop
-	onChange(handler: any, validator?: any): any {
-		validator = validator ? (
-			validator instanceof Array ? (a: any, b: any) => (validator as any).some((k: string) => a?.[k] !== b?.[k]) : validator
-		) : Boolean.bind(null, 1)
-		const subscriptor = (b: any, c: any) => (validator as any)(b, c) && handler(b, c)
-		this.queue.push(subscriptor)
-		return () => {
-			this.queue.splice(
-				this.queue.indexOf(subscriptor), 1
-			)
-		}
-	}
+	// queue = []
+	// /**
+	//  * @description
+	//  * Fire trigger when state is changed but before change components
+	//  */
+	// onChange(handler: Noop<[next: S, prev: S], S>): Noop
+	// /**
+	//  * @description
+	//  * Fire only if some those keys was changed
+	//  */
+	// onChange(handler: Noop<[next: S, prev: S], S>, shouldHandler: string[]): Noop
+	// /**
+	//  * @description
+	//  * Fire only if validator function be true.
+	//  */
+	// onChange(handler: Noop<[next: S, prev: S], S>, shouldHandler: Noop<[next: S, prev: S], boolean>): Noop
+	// onChange(handler: any, validator?: any): any {
+	// 	validator = validator ? (
+	// 		validator instanceof Array ? (a: any, b: any) => (validator as any).some((k: string) => a?.[k] !== b?.[k]) : validator
+	// 	) : Boolean.bind(null, 1)
+	// 	const subscriptor = (b: any, c: any) => (validator as any)(b, c) && handler(b, c)
+	// 	this.queue.push(subscriptor)
+	// 	return () => {
+	// 		this.queue.splice(
+	// 			this.queue.indexOf(subscriptor), 1
+	// 		)
+	// 	}
+	// }
 
-	/**
-	 * @description
-	 * You can also update the state of the store while outside of a component.
-	 * @example
-	 * window.onload = ()=>{
-	 * 	useStore.set({ ready: true })
-	 * }
-	 */
-	set(state: DispatchParam<S>): void
-	async set(state: any) {
-		console.log('set():', { this: this, state })
-		await state
-		if (this.state === state) return
-		const prev = copy(this.state)
-		state = await (typeof state === 'function' ? state(prev) : state)
-		state = state instanceof Array ? [].concat(state) : (
-			typeof (state ?? 0) === 'object' ? merge({}, this.state, state) : state
-		)
-		for (const cb of this.queue)
-			state = await cb(state, prev)
-		this.emit('updated', this.state = state)
-	}
+	// /**
+	//  * @description
+	//  * You can also update the state of the store while outside of a component.
+	//  * @example
+	//  * window.onload = ()=>{
+	//  * 	useStore.set({ ready: true })
+	//  * }
+	//  */
+	// set(state: DispatchParam<S>): void
+	// async set(state: any) {
+	// 	console.log('set():', { this: this, state })
+	// 	await state
+	// 	if (this.state === state) return
+	// 	const prev = copy(this.state)
+	// 	state = await (typeof state === 'function' ? state(prev) : state)
+	// 	state = state instanceof Array ? [].concat(state) : (
+	// 		typeof (state ?? 0) === 'object' ? merge({}, this.state, state) : state
+	// 	)
+	// 	for (const cb of this.queue)
+	// 		state = await cb(state, prev)
+	// 	this.emit('updated', this.state = state)
+	// }
 
 	private __call() {
-		const [state, setState] = React.useState(this.state)
-		React.useEffect(() =>
-			this.listen('updated', (o: any) => setState(copy(o))),
-			[state, setState])
-		return [state, function (value) {
-			console.log('Setting:', value)
+
+		return [this.state, function () {
+			console.log('hook():', { this: this })
 		}]
+		// const [state, setState] = React.useState(this.state)
+		// React.useEffect(() =>
+		// 	this.listen('updated', (o: any) => setState(copy(o))),
+		// 	[state, setState])
+		// return [state, function (value) {
+		// 	console.log('Setting:', value)
+		// }]
 	}
 
 }
