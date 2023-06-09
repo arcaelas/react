@@ -80,7 +80,7 @@ export default class State<S = any> extends Function {
 		this.set(value as any)
 	}
 
-	queue = new Set<Noop>()
+	queue = []
 	/**
 	 * @description
 	 * Fire trigger when state is changed but before change components
@@ -101,8 +101,12 @@ export default class State<S = any> extends Function {
 			validator instanceof Array ? (a: any, b: any) => (validator as any).some((k: string) => a?.[k] !== b?.[k]) : validator
 		) : Boolean.bind(null, 1)
 		const subscriptor = (b: any, c: any) => (validator as any)(b, c) && handler(b, c)
-		this.queue.add(subscriptor)
-		return () => this.queue.delete(subscriptor)
+		this.queue.push(subscriptor)
+		return () => {
+			this.queue.splice(
+				this.queue.indexOf(subscriptor), 1
+			)
+		}
 	}
 
 	/**
@@ -122,7 +126,7 @@ export default class State<S = any> extends Function {
 		state = state instanceof Array ? [].concat(state) : (
 			typeof (state ?? 0) === 'object' ? merge({}, this.state, state) : state
 		)
-		for (const cb of Array.from(this.queue))
+		for (const cb of this.queue)
 			state = await cb(state, prev)
 		this.emit('updated', this.state = state)
 	}
