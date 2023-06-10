@@ -126,12 +126,13 @@ export default class State<S = any> extends Function {
 	// 	}
 	// }
 
-	// protected useHook() {
-	// 	// const [state, setState] = React.useState(this.value)
-	// 	// this.emit('onmount', state)
-	// 	// React.useEffect(() => this.listen('onchange', setState), [setState])
-	// 	// return [state, e => this.set(e, this as any)]
-	// 	return [null, console.log]
-	// }
+	public useHook() {
+		console.log('useHook():', this)
+		// 	// const [state, setState] = React.useState(this.value)
+		// 	// this.emit('onmount', state)
+		// 	// React.useEffect(() => this.listen('onchange', setState), [setState])
+		// 	// return [state, e => this.set(e, this as any)]
+		// 	return [null, console.log]
+	}
 
 }
