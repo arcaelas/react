@@ -110,8 +110,9 @@ export default class State<S = any> extends Function {
 	 * 	useStore.set({ ready: true })
 	 * }
 	 */
-	public set(state: DispatchParam<S>): void
-	public set(state: any) {
+	public set(state: DispatchParam<S>, ...args: any[]): void
+	public set(state: any, ...args: any[]) {
+		console.log('args:', args)
 		state = typeof state === 'function' ? state(this.value) : state
 		state = Array.isArray(state) ? state : (
 			(typeof (state ?? 0) === 'object' && typeof (this.value ?? 0) === 'object') ? merge(this.value, state) : state
@@ -127,6 +128,6 @@ export default class State<S = any> extends Function {
 		const [state, setState] = React.useState(this.value)
 		this.emit('onmount', state)
 		React.useEffect(() => this.listen('onchange', setState), [setState])
-		return [state, this.set.bind(this)]
+		return [state, e => this.set(e, this as any)]
 	}
 }
