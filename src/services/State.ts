@@ -52,7 +52,7 @@ export default class State<S = any> extends Function {
 	constructor(private state: S) {
 		super('...args', 'return this.useHook(...args)')
 		console.log('constructor():', this)
-		return this
+		return this.bind(this)
 	}
 
 	// /**
