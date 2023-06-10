@@ -1,11 +1,11 @@
 import React from 'react'
-import { copy, merge, type Noop, } from '@arcaelas/utils'
+import { copy, merge, } from '@arcaelas/utils'
 
-type NoopSync<A = any, B = any> = Noop<A, B> extends (...args: infer P) => infer R ? (...args: P) => Awaited<R> : never
+type Noop<A = any, R = any> = (...args: A extends any[] ? A : A[]) => R;
 export type IState<S> = S extends never | null | undefined ? null : (
 	S extends object ? Partial<S> & Record<string | number, any> : S
 )
-export type DispatchParam<S> = IState<S> | NoopSync<[current: IState<S>], IState<S>>
+export type DispatchParam<S> = IState<S> | Noop<[current: IState<S>], IState<S>>
 export type DispatchState<S> = (state: DispatchParam<S>) => void
 
 
@@ -44,64 +44,62 @@ export default interface State<S = any> {
 	 * }
 	 * 
 	*/
-	new(state: IState<S>): void
+	new(state: S): void
 	(): [IState<S>, DispatchState<S>]
 }
 export default class State<S = any> extends Function {
 
-	constructor(private state: S) {
-		super('...args', 'return this.__call.call(this, ...args)')
+	constructor(protected state: S) {
+		super('...args', 'return this.useHook(...args)')
 		return this.bind(this)
-	}
-
-	private readonly events = new EventTarget()
-	private listen(evt: string, handler: Noop) {
-		const bind = ({ detail }: CustomEvent) => handler(...detail)
-		this.events.addEventListener(evt, bind)
-		return () => this.events.removeEventListener(evt, bind)
-	}
-	private emit(evt: string, ...args: any[]) {
-		this.events.dispatchEvent(new CustomEvent(evt, {
-			detail: args
-		}))
 	}
 
 	/**
 	 * @description
 	 * Get a copy of current state, without relationship.
 	 */
-	get value(): S {
+	public get value(): S {
 		return copy(this.state)
 	}
-	set value(value: S) {
+	public set value(value: S) {
 		this.set(value as any)
 	}
 
-	private readonly queue = []
+	protected readonly events = new EventTarget()
+	protected listen(evt: string, handler: Noop): Noop {
+		const bind = ({ detail }: CustomEvent) => handler(...[].concat(detail))
+		this.events.addEventListener(evt, bind)
+		return () => this.events.removeEventListener(evt, bind)
+	}
+	protected emit(evt: string, ...args: any[]) {
+		return this.events.dispatchEvent(new CustomEvent(evt, {
+			detail: args
+		}))
+	}
+
+	protected readonly queue = []
 	/**
 	 * @description
 	 * Fire trigger when state is changed but before change components
 	 */
-	onChange(handler: NoopSync<[next: S, prev: S], S>): NoopSync
+	public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>): Noop
 	/**
 	 * @description
 	 * Fire only if some those keys was changed
 	 */
-	onChange(handler: NoopSync<[next: S, prev: S], S>, shouldHandler: string[]): NoopSync
+	public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>, shouldHandler: string[]): Noop
 	/**
 	 * @description
 	 * Fire only if validator function be true.
 	 */
-	onChange(handler: NoopSync<[next: S, prev: S], S>, shouldHandler: NoopSync<[next: S, prev: S], boolean>): NoopSync
-	onChange(handler: any, validator?: any): any {
-		validator = validator ? (
-			Array.isArray(validator) ? (next: S, prev: S) => (validator as any).some((k: string) => next?.[k] !== prev?.[k]) : validator
-		) : Boolean.bind(null, 1)
-		const subscriptor = (next: S, prev: S) => (validator as any)(next, prev) && handler(next, prev)
-		this.queue.push(subscriptor)
-		return () => Boolean(this.queue.splice(
-			this.queue.indexOf(subscriptor), 1
-		))
+	public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>, shouldHandler: Noop<[next: IState<S>, prev: IState<S>], boolean>): Noop
+	public onChange(handler: Noop, validator?: any): Noop {
+		validator = typeof validator === 'function' ? validator : (
+			Array.isArray(validator) ? (next, prev) => validator.some(k => next?.[k] !== prev?.[k]) : Boolean.bind(null, 1)
+		)
+		const bind = (next, prev) => validator(next, prev) ? handler(next, prev) : next
+		this.queue.push(bind)
+		return () => Boolean(this.queue.splice(this.queue.indexOf(bind), 1))
 	}
 
 	/**
@@ -112,26 +110,23 @@ export default class State<S = any> extends Function {
 	 * 	useStore.set({ ready: true })
 	 * }
 	 */
-	set(state: DispatchParam<S>): void
-	set(state: any) {
-		const original = copy(this.state)
-		state = typeof state === 'function' ? state(copy(original)) : state
+	public set(state: DispatchParam<S>): void
+	public set(state: any) {
+		state = typeof state === 'function' ? state(this.value) : state
 		state = Array.isArray(state) ? state : (
-			(typeof (state ?? 0) === 'object' && typeof (original ?? 0) === 'object')
-				? merge({}, original, state) : state
+			(typeof (state ?? 0) === 'object' && typeof (this.value ?? 0) === 'object') ? merge(this.value, state) : state
 		)
-		console.log('This:', this)
-		if (this.state !== state) {
+		if (state !== this.state) {
 			for (const cb of this.queue)
-				state = cb(state, copy(original))
+				state = cb(state, this.value)
 			this.emit('onchange', this.state = state)
 		}
 	}
 
-	private __call() {
-		const [state, setState] = React.useState(this.state)
+	protected useHook() {
+		const [state, setState] = React.useState(this.value)
 		this.emit('onmount', state)
-		React.useEffect(() => this.listen('onchange', value => setState(value)), [setState])
+		React.useEffect(() => this.listen('onchange', setState), [setState])
 		return [state, this.set.bind(this)]
 	}
 }
