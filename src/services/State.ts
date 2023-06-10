@@ -47,9 +47,6 @@ export default interface State<S = any> {
 	new(state: IState<S>): void
 	(): [IState<S>, DispatchState<S>]
 }
-
-
-
 export default class State<S = any> extends Function {
 
 	private state
@@ -71,7 +68,6 @@ export default class State<S = any> extends Function {
 		}))
 	}
 
-
 	/**
 	 * @description
 	 * Get a copy of current state, without relationship.
@@ -79,7 +75,6 @@ export default class State<S = any> extends Function {
 	get value(): S {
 		return copy(this.state)
 	}
-
 	set value(value: S) {
 		this.set(value as any)
 	}
@@ -140,5 +135,4 @@ export default class State<S = any> extends Function {
 		React.useEffect(() => this.listen('onchange', value => setState(value)), [setState])
 		return [state, this.set.bind(this)]
 	}
-
 }
