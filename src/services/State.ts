@@ -49,7 +49,7 @@ export default interface State<S = any> {
 }
 export default class State<S = any> extends Function {
 
-	constructor(protected state: S) {
+	constructor(private state: S) {
 		super('...args', 'return this.useHook(...args)')
 		console.log('constructor():', this)
 		return this
