@@ -51,7 +51,6 @@ export default class State<S = any> extends Function {
 
 	constructor(private state: S) {
 		super('...args', 'return this.useHook(...args)')
-		console.log('constructor():', { self: this })
 		return this.bind(this)
 	}
 
@@ -63,7 +62,7 @@ export default class State<S = any> extends Function {
 		return copy(this.state)
 	}
 	public set value(value: S) {
-
+		this.set(value as any)
 	}
 
 	protected readonly events = new EventTarget()
@@ -78,34 +77,30 @@ export default class State<S = any> extends Function {
 		}))
 	}
 
-
 	protected readonly queue = []
-	// /**
-	//  * @description
-	//  * Fire trigger when state is changed but before change components
-	//  */
-	// public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>): Noop
-	// /**
-	//  * @description
-	//  * Fire only if some those keys was changed
-	//  */
-	// public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>, shouldHandler: string[]): Noop
-	// /**
-	//  * @description
-	//  * Fire only if validator function be true.
-	//  */
-	// public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>, shouldHandler: Noop<[next: IState<S>, prev: IState<S>], boolean>): Noop
-	// public onChange(handler: Noop, validator?: any): Noop {
-	// 	validator = typeof validator === 'function' ? validator : (
-	// 		Array.isArray(validator) ? (next, prev) => validator.some(k => next?.[k] !== prev?.[k]) : Boolean.bind(null, 1)
-	// 	)
-	// 	console.log('onChange():', { handler, validator, self: this })
-
-	// 	// const bind = (next, prev) => validator(next, prev) ? handler(next, prev) : next
-	// 	// this.queue.push(bind)
-	// 	// return () => Boolean(this.queue.splice(this.queue.indexOf(bind), 1))
-	// 	return () => { }
-	// }
+	/**
+	 * @description
+	 * Fire trigger when state is changed but before change components
+	 */
+	public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>): Noop
+	/**
+	 * @description
+	 * Fire only if some those keys was changed
+	 */
+	public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>, shouldHandler: string[]): Noop
+	/**
+	 * @description
+	 * Fire only if validator function be true.
+	 */
+	public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>, shouldHandler: Noop<[next: IState<S>, prev: IState<S>], boolean>): Noop
+	public onChange(handler: Noop, validator?: any): Noop {
+		validator = typeof validator === 'function' ? validator : (
+			Array.isArray(validator) ? (next, prev) => validator.some(k => next?.[k] !== prev?.[k]) : Boolean.bind(null, 1)
+		)
+		const bind = (next, prev) => validator(next, prev) ? handler(next, prev) : next
+		this.queue.push(bind)
+		return () => Boolean(this.queue.splice(this.queue.indexOf(bind), 1))
+	}
 
 	/**
 	 * @description
@@ -117,7 +112,6 @@ export default class State<S = any> extends Function {
 	 */
 	public set(state: DispatchParam<S>, ...args: any[]): void
 	public set(state: any, ...args: any[]) {
-		console.log('args:', args)
 		state = typeof state === 'function' ? state(this.value) : state
 		state = Array.isArray(state) ? state : (
 			(typeof (state ?? 0) === 'object' && typeof (this.value ?? 0) === 'object') ? merge(this.value, state) : state
@@ -131,7 +125,6 @@ export default class State<S = any> extends Function {
 
 	protected useHook() {
 		const [state, setState] = React.useState(this.value)
-		console.log('useHook():', { self: this })
 		React.useEffect(() => this.listen('onchange', setState), [setState])
 		return [state, this.set]
 	}
