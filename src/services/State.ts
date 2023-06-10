@@ -50,7 +50,7 @@ export default interface State<S = any> {
 export default class State<S = any> extends Function {
 
 	constructor(protected state: S) {
-		super('...args', 'return this.useHook(...args)')
+		super('...args', 'return this.useHook.call(this, ...args)')
 		return this.bind(this)
 	}
 
@@ -60,9 +60,6 @@ export default class State<S = any> extends Function {
 	 */
 	public get value(): S {
 		return copy(this.state)
-	}
-	public set value(value: S) {
-		this.set(value as any)
 	}
 
 	protected readonly events = new EventTarget()
@@ -76,6 +73,7 @@ export default class State<S = any> extends Function {
 			detail: args
 		}))
 	}
+
 
 	protected readonly queue = []
 	/**
@@ -125,9 +123,11 @@ export default class State<S = any> extends Function {
 	}
 
 	protected useHook() {
-		const [state, setState] = React.useState(this.value)
-		this.emit('onmount', state)
-		React.useEffect(() => this.listen('onchange', setState), [setState])
-		return [state, e => this.set(e, this as any)]
+		// const [state, setState] = React.useState(this.value)
+		// this.emit('onmount', state)
+		// React.useEffect(() => this.listen('onchange', setState), [setState])
+		// return [state, e => this.set(e, this as any)]
+		return [null, console.log]
 	}
+
 }
