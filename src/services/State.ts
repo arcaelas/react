@@ -3,9 +3,9 @@ import { copy, merge, type Noop, } from '@arcaelas/utils'
 
 export type DispatchState<S> = (state: DispatchParam<S>) => void
 export type DispatchParam<S> = IState<S> | ((current: IState<S>) => IState<S>)
-export type IState<S> = S extends never | null | undefined ? NonNullable<S> : (
+export type IState<S> = S extends never | null | undefined ? any : (
 	S extends Array<never | null | undefined> ? any[] : (
-		S extends Array<any> ? S : (
+		S extends any[] ? S : (
 			S extends object ? Partial<S> & Record<string, any> : S
 		)
 	)
