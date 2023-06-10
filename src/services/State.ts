@@ -50,7 +50,7 @@ export default interface State<S = any> {
 export default class State<S = any> extends Function {
 
 	constructor(private state: S) {
-		super('', 'return this.useHook(this)')
+		super('', 'return this.useHook.call()')
 		return this.bind(this)
 	}
 
@@ -123,10 +123,10 @@ export default class State<S = any> extends Function {
 		}
 	}
 
-	protected useHook(self: this) {
-		const [state, setState] = React.useState(self.value)
-		React.useEffect(() => self.listen('onchange', setState), [setState])
-		return [state, self.set.bind(self)]
+	protected useHook() {
+		const [state, setState] = React.useState(this.value)
+		React.useEffect(() => this.listen('onchange', setState), [setState])
+		return [state, e => this.set(e)]
 	}
 
 }
