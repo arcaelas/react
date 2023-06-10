@@ -68,16 +68,14 @@ export default class State<S = any> extends Function {
 
 	protected readonly events = new EventTarget()
 	protected listen(evt: string, handler: Noop) {
-		console.log('listen():', { self: this })
-		// const bind = ({ detail }: CustomEvent) => handler(...[].concat(detail))
-		// this.events.addEventListener(evt, bind)
-		// return () => this.events.removeEventListener(evt, bind)
+		const bind = ({ detail }: CustomEvent) => handler(...[].concat(detail))
+		this.events.addEventListener(evt, bind)
+		return () => this.events.removeEventListener(evt, bind)
 	}
 	protected emit(evt: string, ...args: any[]) {
-		console.log('emit():', { self: this })
-		// 	return this.events.dispatchEvent(new CustomEvent(evt, {
-		// 		detail: args
-		// 	}))
+		return this.events.dispatchEvent(new CustomEvent(evt, {
+			detail: args
+		}))
 	}
 
 
@@ -117,29 +115,25 @@ export default class State<S = any> extends Function {
 	 * 	useStore.set({ ready: true })
 	 * }
 	 */
-	// public set(state: DispatchParam<S>, ...args: any[]): void
-	// public set(state: any, ...args: any[]) {
-	// 	console.log('args:', args)
-	// 	state = typeof state === 'function' ? state(this.value) : state
-	// 	state = Array.isArray(state) ? state : (
-	// 		(typeof (state ?? 0) === 'object' && typeof (this.value ?? 0) === 'object') ? merge(this.value, state) : state
-	// 	)
-	// 	if (state !== this.state) {
-	// 		for (const cb of this.queue)
-	// 			state = cb(state, this.value)
-	// 		this.emit('onchange', this.state = state)
-	// 	}
-	// }
+	public set(state: DispatchParam<S>, ...args: any[]): void
+	public set(state: any, ...args: any[]) {
+		console.log('args:', args)
+		state = typeof state === 'function' ? state(this.value) : state
+		state = Array.isArray(state) ? state : (
+			(typeof (state ?? 0) === 'object' && typeof (this.value ?? 0) === 'object') ? merge(this.value, state) : state
+		)
+		if (state !== this.state) {
+			for (const cb of this.queue)
+				state = cb(state, this.value)
+			this.emit('onchange', this.state = state)
+		}
+	}
 
 	protected useHook() {
+		const [state, setState] = React.useState(this.value)
 		console.log('useHook():', { self: this })
-		this.listen('onchange', console.log)
-		return []
-		// const [state, setState] = React.useState(this.value)
-		// this.emit('onmount', state)
-		// React.useEffect(() => this.listen('onchange', setState), [setState])
-		// return [state, e => this.set(e, this as any)]
-		// return [null, console.log]
+		React.useEffect(() => this.listen('onchange', setState), [setState])
+		return [state, this.set]
 	}
 
 }
