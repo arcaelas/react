@@ -51,7 +51,7 @@ export default class State<S = any> extends Function {
 
 	constructor(private state: S) {
 		super('...args', 'return this.useHook(...args)')
-		console.log('constructor():', this)
+		console.log('constructor():', { self: this })
 		return this.bind(this)
 	}
 
@@ -63,6 +63,7 @@ export default class State<S = any> extends Function {
 	// 	return copy(this.state)
 	// }
 
+	protected readonly queue = []
 	protected readonly events = new EventTarget()
 	protected listen(evt: string, handler: Noop) {
 		console.log('listen():', { self: this })
@@ -70,14 +71,14 @@ export default class State<S = any> extends Function {
 		// this.events.addEventListener(evt, bind)
 		// return () => this.events.removeEventListener(evt, bind)
 	}
-	// protected emit(evt: string, ...args: any[]) {
-	// 	return this.events.dispatchEvent(new CustomEvent(evt, {
-	// 		detail: args
-	// 	}))
-	// }
+	protected emit(evt: string, ...args: any[]) {
+		console.log('emit():', { self: this })
+		// 	return this.events.dispatchEvent(new CustomEvent(evt, {
+		// 		detail: args
+		// 	}))
+	}
 
 
-	// protected readonly queue = []
 	// /**
 	//  * @description
 	//  * Fire trigger when state is changed but before change components
