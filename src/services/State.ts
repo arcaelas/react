@@ -51,57 +51,58 @@ export default class State<S = any> extends Function {
 
 	constructor(protected state: S) {
 		super('...args', 'return this.useHook(...args)')
-		return this.bind(this)
+		console.log('constructor():', this)
+		return this
 	}
 
-	/**
-	 * @description
-	 * Get a copy of current state, without relationship.
-	 */
-	public get value(): S {
-		return copy(this.state)
-	}
+	// /**
+	//  * @description
+	//  * Get a copy of current state, without relationship.
+	//  */
+	// public get value(): S {
+	// 	return copy(this.state)
+	// }
 
-	protected readonly events = new EventTarget()
-	protected listen(evt: string, handler: Noop): Noop {
-		const bind = ({ detail }: CustomEvent) => handler(...[].concat(detail))
-		this.events.addEventListener(evt, bind)
-		return () => this.events.removeEventListener(evt, bind)
-	}
-	protected emit(evt: string, ...args: any[]) {
-		return this.events.dispatchEvent(new CustomEvent(evt, {
-			detail: args
-		}))
-	}
+	// protected readonly events = new EventTarget()
+	// protected listen(evt: string, handler: Noop): Noop {
+	// 	const bind = ({ detail }: CustomEvent) => handler(...[].concat(detail))
+	// 	this.events.addEventListener(evt, bind)
+	// 	return () => this.events.removeEventListener(evt, bind)
+	// }
+	// protected emit(evt: string, ...args: any[]) {
+	// 	return this.events.dispatchEvent(new CustomEvent(evt, {
+	// 		detail: args
+	// 	}))
+	// }
 
 
-	protected readonly queue = []
-	/**
-	 * @description
-	 * Fire trigger when state is changed but before change components
-	 */
-	public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>): Noop
-	/**
-	 * @description
-	 * Fire only if some those keys was changed
-	 */
-	public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>, shouldHandler: string[]): Noop
-	/**
-	 * @description
-	 * Fire only if validator function be true.
-	 */
-	public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>, shouldHandler: Noop<[next: IState<S>, prev: IState<S>], boolean>): Noop
-	public onChange(handler: Noop, validator?: any): Noop {
-		validator = typeof validator === 'function' ? validator : (
-			Array.isArray(validator) ? (next, prev) => validator.some(k => next?.[k] !== prev?.[k]) : Boolean.bind(null, 1)
-		)
-		console.log('onChange():', { handler, validator, self: this })
+	// protected readonly queue = []
+	// /**
+	//  * @description
+	//  * Fire trigger when state is changed but before change components
+	//  */
+	// public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>): Noop
+	// /**
+	//  * @description
+	//  * Fire only if some those keys was changed
+	//  */
+	// public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>, shouldHandler: string[]): Noop
+	// /**
+	//  * @description
+	//  * Fire only if validator function be true.
+	//  */
+	// public onChange(handler: Noop<[next: IState<S>, prev: IState<S>], IState<S>>, shouldHandler: Noop<[next: IState<S>, prev: IState<S>], boolean>): Noop
+	// public onChange(handler: Noop, validator?: any): Noop {
+	// 	validator = typeof validator === 'function' ? validator : (
+	// 		Array.isArray(validator) ? (next, prev) => validator.some(k => next?.[k] !== prev?.[k]) : Boolean.bind(null, 1)
+	// 	)
+	// 	console.log('onChange():', { handler, validator, self: this })
 
-		// const bind = (next, prev) => validator(next, prev) ? handler(next, prev) : next
-		// this.queue.push(bind)
-		// return () => Boolean(this.queue.splice(this.queue.indexOf(bind), 1))
-		return () => { }
-	}
+	// 	// const bind = (next, prev) => validator(next, prev) ? handler(next, prev) : next
+	// 	// this.queue.push(bind)
+	// 	// return () => Boolean(this.queue.splice(this.queue.indexOf(bind), 1))
+	// 	return () => { }
+	// }
 
 	/**
 	 * @description
@@ -125,12 +126,12 @@ export default class State<S = any> extends Function {
 	// 	}
 	// }
 
-	protected useHook() {
-		// const [state, setState] = React.useState(this.value)
-		// this.emit('onmount', state)
-		// React.useEffect(() => this.listen('onchange', setState), [setState])
-		// return [state, e => this.set(e, this as any)]
-		return [null, console.log]
-	}
+	// protected useHook() {
+	// 	// const [state, setState] = React.useState(this.value)
+	// 	// this.emit('onmount', state)
+	// 	// React.useEffect(() => this.listen('onchange', setState), [setState])
+	// 	// return [state, e => this.set(e, this as any)]
+	// 	return [null, console.log]
+	// }
 
 }
