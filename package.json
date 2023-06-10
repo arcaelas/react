@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest",
     "start": "tsc --watch",
-    "commit": "npm version minor && npm publish --access=public",
+    "commit": "npm version patch && npm publish --access=public",
     "Void prepublishOnly": "npm run test && tsc && npm version minor",
     "postpublish": "rm -rf lib"
   },
