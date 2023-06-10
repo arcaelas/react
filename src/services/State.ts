@@ -49,10 +49,8 @@ export default interface State<S = any> {
 }
 export default class State<S = any> extends Function {
 
-	private state
-	constructor(state) {
-		super('...args', 'return this.__call(...args)')
-		this.state = state ?? null
+	constructor(private state: S) {
+		super('...args', 'return this.__call.call(this, ...args)')
 		return this.bind(this)
 	}
 
@@ -79,7 +77,7 @@ export default class State<S = any> extends Function {
 		this.set(value as any)
 	}
 
-	queue = []
+	private readonly queue = []
 	/**
 	 * @description
 	 * Fire trigger when state is changed but before change components
