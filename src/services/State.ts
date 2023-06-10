@@ -63,12 +63,13 @@ export default class State<S = any> extends Function {
 	// 	return copy(this.state)
 	// }
 
-	// protected readonly events = new EventTarget()
-	// protected listen(evt: string, handler: Noop): Noop {
-	// 	const bind = ({ detail }: CustomEvent) => handler(...[].concat(detail))
-	// 	this.events.addEventListener(evt, bind)
-	// 	return () => this.events.removeEventListener(evt, bind)
-	// }
+	protected readonly events = new EventTarget()
+	protected listen(evt: string, handler: Noop) {
+		console.log('listen():', { self: this })
+		// const bind = ({ detail }: CustomEvent) => handler(...[].concat(detail))
+		// this.events.addEventListener(evt, bind)
+		// return () => this.events.removeEventListener(evt, bind)
+	}
 	// protected emit(evt: string, ...args: any[]) {
 	// 	return this.events.dispatchEvent(new CustomEvent(evt, {
 	// 		detail: args
@@ -126,8 +127,9 @@ export default class State<S = any> extends Function {
 	// 	}
 	// }
 
-	public useHook() {
-		console.log('useHook():', this)
+	protected useHook() {
+		console.log('useHook():', { self: this })
+		this.listen('onchange', console.log)
 		// 	// const [state, setState] = React.useState(this.value)
 		// 	// this.emit('onmount', state)
 		// 	// React.useEffect(() => this.listen('onchange', setState), [setState])
