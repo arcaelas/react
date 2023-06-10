@@ -95,10 +95,12 @@ export default class State<S = any> extends Function {
 		validator = typeof validator === 'function' ? validator : (
 			Array.isArray(validator) ? (next, prev) => validator.some(k => next?.[k] !== prev?.[k]) : Boolean.bind(null, 1)
 		)
-		const bind = (next, prev) => validator(next, prev) ? handler(next, prev) : next
-		this.queue.push(bind)
 		console.log('onChange():', { handler, validator, self: this })
-		return () => Boolean(this.queue.splice(this.queue.indexOf(bind), 1))
+
+		// const bind = (next, prev) => validator(next, prev) ? handler(next, prev) : next
+		// this.queue.push(bind)
+		// return () => Boolean(this.queue.splice(this.queue.indexOf(bind), 1))
+		return () => { }
 	}
 
 	/**
