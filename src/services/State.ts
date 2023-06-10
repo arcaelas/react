@@ -97,6 +97,7 @@ export default class State<S = any> extends Function {
 		)
 		const bind = (next, prev) => validator(next, prev) ? handler(next, prev) : next
 		this.queue.push(bind)
+		console.log('onChange():', { handler, validator, self: this })
 		return () => Boolean(this.queue.splice(this.queue.indexOf(bind), 1))
 	}
 
@@ -108,19 +109,19 @@ export default class State<S = any> extends Function {
 	 * 	useStore.set({ ready: true })
 	 * }
 	 */
-	public set(state: DispatchParam<S>, ...args: any[]): void
-	public set(state: any, ...args: any[]) {
-		console.log('args:', args)
-		state = typeof state === 'function' ? state(this.value) : state
-		state = Array.isArray(state) ? state : (
-			(typeof (state ?? 0) === 'object' && typeof (this.value ?? 0) === 'object') ? merge(this.value, state) : state
-		)
-		if (state !== this.state) {
-			for (const cb of this.queue)
-				state = cb(state, this.value)
-			this.emit('onchange', this.state = state)
-		}
-	}
+	// public set(state: DispatchParam<S>, ...args: any[]): void
+	// public set(state: any, ...args: any[]) {
+	// 	console.log('args:', args)
+	// 	state = typeof state === 'function' ? state(this.value) : state
+	// 	state = Array.isArray(state) ? state : (
+	// 		(typeof (state ?? 0) === 'object' && typeof (this.value ?? 0) === 'object') ? merge(this.value, state) : state
+	// 	)
+	// 	if (state !== this.state) {
+	// 		for (const cb of this.queue)
+	// 			state = cb(state, this.value)
+	// 		this.emit('onchange', this.state = state)
+	// 	}
+	// }
 
 	protected useHook() {
 		// const [state, setState] = React.useState(this.value)
