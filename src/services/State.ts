@@ -47,11 +47,10 @@ export default interface State<S = any> {
 	new(state: S): void
 	(): [IState<S>, DispatchState<S>]
 }
-export default class State<S = any> extends Function {
+export default class State<S = any> {
 
 	constructor(private state: S) {
-		super('', 'return this.useHook(this)')
-		return this
+		return Object.setPrototypeOf(() => this.onCall(), this)
 	}
 
 	/**
@@ -123,10 +122,10 @@ export default class State<S = any> extends Function {
 		}
 	}
 
-	private useHook(self: this) {
-		const [state, setState] = React.useState(self.value)
-		React.useEffect(() => self.listen('onchange', setState), [setState])
-		return [state, e => self.set(e)]
+	private onCall() {
+		const [state, setState] = React.useState(this.value)
+		React.useEffect(() => this.listen('onchange', setState), [setState])
+		return [state, e => this.set(e)]
 	}
 
 }
