@@ -55,15 +55,17 @@ export default class State<S = any> extends Function {
 		return this.bind(this)
 	}
 
-	// /**
-	//  * @description
-	//  * Get a copy of current state, without relationship.
-	//  */
-	// public get value(): S {
-	// 	return copy(this.state)
-	// }
+	/**
+	 * @description
+	 * Get a copy of current state, without relationship.
+	 */
+	public get value(): S {
+		return copy(this.state)
+	}
+	public set value(value: S) {
 
-	protected readonly queue = []
+	}
+
 	protected readonly events = new EventTarget()
 	protected listen(evt: string, handler: Noop) {
 		console.log('listen():', { self: this })
@@ -79,6 +81,7 @@ export default class State<S = any> extends Function {
 	}
 
 
+	protected readonly queue = []
 	// /**
 	//  * @description
 	//  * Fire trigger when state is changed but before change components
@@ -131,11 +134,12 @@ export default class State<S = any> extends Function {
 	protected useHook() {
 		console.log('useHook():', { self: this })
 		this.listen('onchange', console.log)
-		// 	// const [state, setState] = React.useState(this.value)
-		// 	// this.emit('onmount', state)
-		// 	// React.useEffect(() => this.listen('onchange', setState), [setState])
-		// 	// return [state, e => this.set(e, this as any)]
-		// 	return [null, console.log]
+		return []
+		// const [state, setState] = React.useState(this.value)
+		// this.emit('onmount', state)
+		// React.useEffect(() => this.listen('onchange', setState), [setState])
+		// return [state, e => this.set(e, this as any)]
+		// return [null, console.log]
 	}
 
 }
