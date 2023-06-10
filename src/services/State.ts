@@ -122,6 +122,7 @@ export default class State<S = any> extends Function {
 			(typeof (state ?? 0) === 'object' && typeof (original ?? 0) === 'object')
 				? merge({}, original, state) : state
 		)
+		console.log('This:', this)
 		if (this.state !== state) {
 			for (const cb of this.queue)
 				state = cb(state, copy(original))
