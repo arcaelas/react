@@ -124,6 +124,7 @@ export default class State<S = any> {
 
 	private onCall() {
 		const [state, setState] = React.useState(this.state)
+		console.log(this.queue)
 		React.useEffect(() => this.listen('onchange', e => setState(e)), [setState])
 		return [state, this.set]
 	}
