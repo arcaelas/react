@@ -109,15 +109,15 @@ export default class State<S = any> {
 	 * 	useStore.set({ ready: true })
 	 * }
 	 */
-	public set(state: DispatchParam<S>, ...args: any[]): void
-	public set(state: any, ...args: any[]) {
+	public set(state: DispatchParam<S>, ...args: any[]): Promise<void>
+	public async set(state: any, ...args: any[]) {
 		state = typeof state === 'function' ? state(this.value) : state
 		state = Array.isArray(state) ? state : (
 			(typeof (state ?? 0) === 'object' && typeof (this.value ?? 0) === 'object') ? merge(this.value, state) : state
 		)
 		if (state !== this.state) {
 			for (const cb of this.queue)
-				state = cb(state, this.value)
+				state = await cb(state, this.value)
 			this.emit('onchange', this.state = state)
 		}
 	}
