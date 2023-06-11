@@ -109,23 +109,23 @@ export default class State<S = any> {
 	 * 	useStore.set({ ready: true })
 	 * }
 	 */
-	public set(state: DispatchParam<S>, ...args: any[]): Promise<void>
-	public async set(state: any, ...args: any[]) {
-		state = typeof state === 'function' ? state(this.value) : state
+	public set(state: DispatchParam<S>): void
+	public set(state: any) {
+		state = typeof state === 'function' ? state(this.state) : state
 		state = Array.isArray(state) ? state : (
-			(typeof (state ?? 0) === 'object' && typeof (this.value ?? 0) === 'object') ? merge(this.value, state) : state
+			(typeof (state ?? 0) === 'object' && typeof (this.state ?? 0) === 'object') ? merge({}, this.state, state) : state
 		)
 		if (state !== this.state) {
 			for (const cb of this.queue)
-				state = await cb(state, this.value)
+				state = cb(state, this.value)
 			this.emit('onchange', this.state = state)
 		}
 	}
 
 	private onCall() {
-		const [state, setState] = React.useState(this.value)
-		React.useEffect(() => this.listen('onchange', setState), [setState])
-		return [state, e => this.set(e)]
+		const [state, setState] = React.useState(this.state)
+		React.useEffect(() => this.listen('onchange', e => setState(e)), [setState])
+		return [state, this.set]
 	}
 
 }
