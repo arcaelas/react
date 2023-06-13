@@ -85,13 +85,11 @@ export default function createStore<S = any>(initialState: S): Store<S> {
 	function useStore() {
 		const [store, setStore] = React.useState(state)
 		React.useEffect(() => listen('onchange', e => setStore(e)), [setStore])
-		return [store, useStore.prototype.set.bind(useStore)]
+		return [store, useStore.set]
 	}
-	useStore.prototype.set = function set() { } as any
-	useStore.prototype.onChange = function onchange() { } as any
 
 	const queue: Noop[] = []
-	useStore.prototype.onChange = function onChange(handler: Noop<[next: S, prev: S], S>, validator?: string[] | Noop<[next: S, prev: S], boolean>): Noop {
+	useStore.onChange = function onChange(handler: Noop<[next: S, prev: S], S>, validator?: string[] | Noop<[next: S, prev: S], boolean>): Noop {
 		validator = typeof validator === 'function' ? validator : (
 			validator instanceof Array ? (next: any, prev: any) => (validator as string[]).some(k => next?.[k] !== prev?.[k]) : Boolean.bind(null, 1)
 		)
@@ -99,7 +97,7 @@ export default function createStore<S = any>(initialState: S): Store<S> {
 		queue.push(bind)
 		return () => Boolean(queue.splice(queue.indexOf(bind), 1))
 	}
-	useStore.prototype.set = function set(value: any) {
+	useStore.set = function set(value: any) {
 		const current = copy(state)
 		value = typeof value === 'function' ? value(copy(current)) : value
 		value = Array.isArray(value) ? value : (
