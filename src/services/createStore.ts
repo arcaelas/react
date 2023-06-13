@@ -3,7 +3,7 @@ import { copy, merge, } from '@arcaelas/utils'
 
 type Noop<A = any, R = any> = (...args: A extends any[] ? A : A[]) => R;
 type Dispatch<T> = T | Noop<[current: T], T>
-interface Store<S = any> {
+export interface Store<S = any> {
 	(): [S, Dispatch<S>]
 
 	/**
